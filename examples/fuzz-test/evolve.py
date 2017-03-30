@@ -56,7 +56,7 @@ def eval_genome(genome, config):
 
             #print("afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name))
             try:
-                subprocess.call("/usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name), shell=True)
+                subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name), shell=True)
 
                 with open(covf.name, "r") as covr:
                     coverage |= set(covr.read().splitlines())
