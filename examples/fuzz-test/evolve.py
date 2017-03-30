@@ -31,7 +31,7 @@ def sinc(x):
 
 
 # N is the length of the test sequence.
-N = 16
+N = 4
 # num_tests is the number of random examples each network is tested against.
 num_inputbits = 2 ** N
 
@@ -95,7 +95,7 @@ def run():
     pop.add_reporter(neat.StdOutReporter(True))
 
     if 1:
-        pe = neat.ParallelEvaluator(4, eval_genome)
+        pe = neat.ParallelEvaluator(8, eval_genome)
         winner = pop.run(pe.evaluate, 1000)
     else:
         winner = pop.run(eval_genomes, 1000)
@@ -105,9 +105,9 @@ def run():
     stats.save()
 
     # # Show output of the most fit genome against a random input.
-    # print('\nBest genome:\n{!s}'.format(winner))
-    # print('\nOutput:')
-    # winner_net = neat.nn.RecurrentNetwork.create(winner, config)
+    print('\nBest genome:\n{!s}'.format(winner))
+    print('\nOutput:')
+    winner_net = neat.nn.RecurrentNetwork.create(winner, config)
     # num_correct = 0
     # for n in range(num_tests):
     #     print('\nRun {0} output:'.format(n))

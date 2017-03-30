@@ -9,10 +9,10 @@ pop_size              = 500
 reset_on_extinction   = 0
 
 [DefaultGenome]
-num_inputs              = 16
-num_hidden              = 1
+num_inputs              = 4
+num_hidden              = 200
 num_outputs             = 800
-initial_connection      = partial 0.5
+initial_connection      = partial 0.01
 feed_forward            = False
 compatibility_disjoint_coefficient = 1.0
 compatibility_weight_coefficient   = 0.6
@@ -20,11 +20,11 @@ conn_add_prob           = 0.1
 conn_delete_prob        = 0.1
 node_add_prob           = 0.1
 node_delete_prob        = 0.1
-activation_default      = my_sinc_function
-activation_options      = sigmoid my_sinc_function
+activation_default      = sigmoid
+activation_options      = abs clamped cube exp gauss hat identity inv log relu sigmoid sin softplus square tanh
 activation_mutate_rate  = 0.1
 aggregation_default     = sum
-aggregation_options     = sum
+aggregation_options     = sum product
 aggregation_mutate_rate = 0.0
 bias_init_mean          = 0.0
 bias_init_stdev         = 1.0
@@ -59,6 +59,6 @@ species_fitness_func = max
 max_stagnation  = 20
 
 [DefaultReproduction]
-elitism            = 2
+elitism            = 10
 survival_threshold = 0.2
 
