@@ -30,11 +30,10 @@ def sinc(x):
     return 1.0 if x == 0 else math.sin(x) / x
 
 
-# N is the length of the test sequence.
-N = 4
+# number of inputs in the network
+num_inputbits = 200
 # num_tests is the number of random examples each network is tested against.
-num_inputbits = 2 ** N
-
+num_tests = 16
 
 
 def eval_genome(genome, config):
@@ -42,9 +41,11 @@ def eval_genome(genome, config):
 
     coverage = set()
 
-    for i in range(num_inputbits):
+    for i in range(num_tests):
         net.reset()
-        inputs = map(float, list("{0:b}".format(i).zfill(N)))
+        random.seed(i)
+        inputs = [random.random() for x in xrange(num_inputbits)]
+        #inputs = map(float, list("{0:b}".format(i).zfill(N)))
         output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
 
         # Write outupt to file
