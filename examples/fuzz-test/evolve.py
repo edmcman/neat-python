@@ -35,6 +35,17 @@ num_inputbits = 200
 # num_tests is the number of random examples each network is tested against.
 num_tests = 16
 
+class CustomReporter(neat.reporting.BaseReporter):
+    def end_generation(self, config, population, species_set):
+        for k,v in species_set.species.iteritems():
+            print("Best Genome in Species {: >4}".format(k))
+            net = neat.nn.RecurrentNetwork.create(v.members.itervalues().next(), config)
+            for i in range(num_tests):
+                #net.reset()
+                random.seed(i)
+                inputs = [random.random() for x in xrange(num_inputbits)]
+                output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
+                print("Output: %s" % output)
 
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
@@ -42,7 +53,7 @@ def eval_genome(genome, config):
     coverage = set()
 
     for i in range(num_tests):
-        net.reset()
+        #net.reset()
         random.seed(i)
         inputs = [random.random() for x in xrange(num_inputbits)]
         #inputs = map(float, list("{0:b}".format(i).zfill(N)))
@@ -94,6 +105,7 @@ def run():
     stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
     pop.add_reporter(neat.StdOutReporter(True))
+    pop.add_reporter(CustomReporter())
 
     if 1:
         pe = neat.ParallelEvaluator(8, eval_genome)
