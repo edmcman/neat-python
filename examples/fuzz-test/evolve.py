@@ -38,15 +38,17 @@ num_tests = 16
 class CustomReporter(neat.reporting.BaseReporter):
     def end_generation(self, config, population, species_set):
         for k,v in species_set.species.iteritems():
-            print("Best Genome in Species {: >4}".format(k))
-            net = neat.nn.RecurrentNetwork.create(v.members.itervalues().next(), config)
-            for i in range(num_tests):
-                #net.reset()
+            genome = max(v.members.itervalues(), key=lambda x: x.fitness)
+            net = neat.nn.RecurrentNetwork.create(genome, config)
+
+            def f(i):
                 random.seed(i)
                 inputs = [random.random() for x in xrange(num_inputbits)]
-                output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
-                print("Output: %s" % output)
+                return BitArray(map(int, map(round, net.activate(inputs)))).bytes
 
+            print("Best genome for species:", k, map(f, xrange(num_tests)))
+            #print("Genome for species:", k, str(genome))
+            
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
 
