@@ -8,7 +8,7 @@ This example also demonstrates the use of a custom activation function.
 
 from __future__ import division, print_function
 
-from bitstring import BitArray
+from bitstring import BitArray, Bits
 
 import math
 import os
@@ -44,11 +44,12 @@ class CustomReporter(neat.reporting.BaseReporter):
             def f(i):
                 random.seed(i)
                 inputs = [random.random() for x in xrange(num_inputbits)]
-                return BitArray(map(int, map(round, net.activate(inputs)))).bytes
+                output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
+                return output.bytes
 
             print("Best genome for species:", k, map(f, xrange(num_tests)))
             #print("Genome for species:", k, str(genome))
-            
+
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
 
@@ -59,8 +60,11 @@ def eval_genome(genome, config):
         random.seed(i)
         inputs = [random.random() for x in xrange(num_inputbits)]
         #inputs = map(float, list("{0:b}".format(i).zfill(N)))
-        output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
-
+        # bitwise
+        #output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
+        # bytewise
+        output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs))).bytes
+        
         # Write outupt to file
         with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
             #print(output)
