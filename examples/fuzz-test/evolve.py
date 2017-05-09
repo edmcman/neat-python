@@ -111,7 +111,7 @@ def run():
     stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
     pop.add_reporter(neat.StdOutReporter(True))
-    pop.add_reporter(CustomReporter())
+    #pop.add_reporter(CustomReporter())
 
     if 1:
         pe = neat.ParallelEvaluator(8, eval_genome)
