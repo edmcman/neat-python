@@ -14,6 +14,7 @@ import math
 import os
 import sys
 import random
+import multiprocessing
 
 import neat
 import visualize
@@ -35,19 +36,25 @@ num_inputbits = 200
 # num_tests is the number of random examples each network is tested against.
 num_tests = 16
 
+def get_outputbytes(net, i):
+    random.seed(i)
+    inputs = [random.random() for x in xrange(num_inputbits)]
+    output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
+    return output.bytes
+
+def get_commandline(argv, filename):
+    if "@@" in argv:
+        return " ".join([filename if x=="@@" else x for x in argv[1:]])
+    else:
+        return " ".join(argv[1:]) + " < " + filename
+
 class CustomReporter(neat.reporting.BaseReporter):
     def end_generation(self, config, population, species_set):
         for k,v in species_set.species.iteritems():
             genome = max(v.members.itervalues(), key=lambda x: x.fitness)
             net = neat.nn.RecurrentNetwork.create(genome, config)
 
-            def f(i):
-                random.seed(i)
-                inputs = [random.random() for x in xrange(num_inputbits)]
-                output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
-                return output.bytes
-
-            print("Best genome for species:", k, map(f, xrange(num_tests)))
+            print("Best genome for species:", k, map(lambda i: f(net, i), xrange(num_tests)))
             #print("Genome for species:", k, str(genome))
 
 def eval_genome(genome, config):
@@ -56,15 +63,8 @@ def eval_genome(genome, config):
     coverage = set()
 
     for i in range(num_tests):
-        #net.reset()
-        random.seed(i)
-        inputs = [random.random() for x in xrange(num_inputbits)]
-        #inputs = map(float, list("{0:b}".format(i).zfill(N)))
-        # bitwise
-        #output = BitArray(map(int, map(round, net.activate(inputs)))).bytes
-        # bytewise
-        output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs))).bytes
-        
+        output = get_outputbytes(net, i)
+
         # Write outupt to file
         with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
             #print(output)
@@ -73,7 +73,8 @@ def eval_genome(genome, config):
 
             #print("afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name))
             try:
-                subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name), shell=True)
+                cl = get_commandline(config.argv, f.name)
+                subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- %s" % (covf.name, cl), shell=True)
 
                 with open(covf.name, "r") as covr:
                     coverage |= set(covr.read().splitlines())
@@ -91,13 +92,14 @@ def eval_genomes(genomes, config):
         genome.fitness = eval_genome(genome, config)
 
 
-def run():
+def run(argv):
     # Determine path to configuration file.
     local_dir = os.path.dirname(__file__)
     config_path = os.path.join(local_dir, 'config')
     config = neat.Config(neat.DefaultGenome, neat.DefaultReproduction,
                          neat.DefaultSpeciesSet, neat.DefaultStagnation,
                          config_path)
+    config.argv = argv
 
     # Demonstration of saving a configuration back to a text file.
     config.save('test_save_config.txt')
@@ -114,7 +116,7 @@ def run():
     #pop.add_reporter(CustomReporter())
 
     if 1:
-        pe = neat.ParallelEvaluator(8, eval_genome)
+        pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), eval_genome)
         winner = pop.run(pe.evaluate, 1000)
     else:
         winner = pop.run(eval_genomes, 1000)
@@ -153,4 +155,4 @@ def run():
 
 
 if __name__ == '__main__':
-    run()
+    run(sys.argv)
