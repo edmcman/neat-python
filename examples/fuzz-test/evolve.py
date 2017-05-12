@@ -17,10 +17,11 @@ import random
 import multiprocessing
 
 import neat
-import visualize
 
 import subprocess
 import tempfile
+
+import time
 
 # Demonstration of how to add your own custom activation function.
 # This sinc function will be available if my_sinc_function is included in the
@@ -49,13 +50,16 @@ def get_commandline(argv, filename):
         return " ".join(argv[1:]) + " < " + filename
 
 class CustomReporter(neat.reporting.BaseReporter):
-    def end_generation(self, config, population, species_set):
-        for k,v in species_set.species.iteritems():
-            genome = max(v.members.itervalues(), key=lambda x: x.fitness)
-            net = neat.nn.RecurrentNetwork.create(genome, config)
+    # def end_generation(self, config, population, species_set):
+    #     for k,v in species_set.species.iteritems():
+    #         genome = max(v.members.itervalues(), key=lambda x: x.fitness)
+    #         net = neat.nn.RecurrentNetwork.create(genome, config)
 
-            print("Best genome for species:", k, map(lambda i: f(net, i), xrange(num_tests)))
-            #print("Genome for species:", k, str(genome))
+    #         print("Best genome for species:", k, map(lambda i: f(net, i), xrange(num_tests)))
+    #         #print("Genome for species:", k, str(genome))
+
+    def post_evaluate(self, config, population, species, best_genome):
+        print("STATUS %f,%f" % (time.time(), best_genome.fitness))
 
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
@@ -113,7 +117,7 @@ def run(argv):
     stats = neat.StatisticsReporter()
     pop.add_reporter(stats)
     pop.add_reporter(neat.StdOutReporter(True))
-    #pop.add_reporter(CustomReporter())
+    pop.add_reporter(CustomReporter())
 
     if 1:
         pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), eval_genome)
