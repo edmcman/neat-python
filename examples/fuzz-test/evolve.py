@@ -66,27 +66,31 @@ def eval_genome(genome, config):
 
     coverage = set()
 
-    for i in range(num_tests):
-        output = get_outputbytes(net, i)
+    try:
 
-        # Write outupt to file
-        with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
-            #print(output)
-            f.write(output)
-            f.flush()
+        for i in range(num_tests):
+            output = get_outputbytes(net, i)
 
-            #print("afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name))
-            try:
+            # Write outupt to file
+            with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
+                #print(output)
+                f.write(output)
+                f.flush()
+
+                #print("afl-showmap -o %s -t 10000 -m 2000 -Q -q -- /usr/bin/identify %s" % (covf.name, f.name))
                 cl = get_commandline(config.argv, f.name)
-                subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- %s" % (covf.name, cl), shell=True)
+                try:
+                    subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- %s" % (covf.name, cl), shell=True)
 
-                with open(covf.name, "r") as covr:
-                    coverage |= set(covr.read().splitlines())
-                #print(len(coverage))
+                    with open(covf.name, "r") as covr:
+                        coverage |= set(covr.read().splitlines())
+                        #print(len(coverage))
+                except Exception as e:
+                    print ("Ignoring exception from afl-showmap", e)
 
-            except Exception as e:
-                print("Exception!", e)
-            # parse results, get coverage
+    except Exception as e:
+        print ("Exception captured, returning zero", e)
+        return 0
 
     return float(len(coverage))
 
