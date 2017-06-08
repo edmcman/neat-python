@@ -9,7 +9,8 @@ pop_size              = 500
 reset_on_extinction   = 0
 
 [DefaultGenome]
-num_inputs              = 4
+# 256 constant inputs + 4 random
+num_inputs              = 260
 num_hidden              = 300
 num_outputs             = 4
 initial_connection      = partial 0.01
@@ -20,8 +21,10 @@ conn_add_prob           = 0.1
 conn_delete_prob        = 0.1
 node_add_prob           = 0.1
 node_delete_prob        = 0.1
-activation_default      = sigmoid
-activation_options      = abs clamped cube exp gauss hat identity inv log relu sigmoid sin softplus square tanh
+activation_default      = identity
+#sigmoid
+# activation_options      = abs clamped cube exp gauss hat identity inv log relu sigmoid sin softplus square tanh
+activation_options      = identity
 activation_mutate_rate  = 0.1
 aggregation_default     = sum
 aggregation_options     = sum product

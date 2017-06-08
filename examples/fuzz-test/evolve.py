@@ -39,7 +39,7 @@ num_tests = 16
 
 def get_outputbytes(net, i):
     random.seed(i)
-    inputs = [random.random() for x in xrange(num_inputbytes)]
+    inputs = [x/256.0 for x in xrange(0,256)]+[random.random() for x in xrange(num_inputbytes)]
     output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
     return output.bytes
 
@@ -59,6 +59,7 @@ class CustomReporter(neat.reporting.BaseReporter):
     #         #print("Genome for species:", k, str(genome))
 
     def post_evaluate(self, config, population, species, best_genome):
+        #print(best_genome)
         print("STATUS %f,%f" % (time.time(), best_genome.fitness))
 
 def eval_genome(genome, config):
@@ -70,6 +71,14 @@ def eval_genome(genome, config):
 
         for i in range(num_tests):
             output = get_outputbytes(net, i)
+            if output[0] == 'F':
+                print('F')
+                if output[1] == 'U':
+                    print('U')
+                    if output[2] == 'Z':
+                        print('Z')
+                        if output[3] == 'Z':
+                            print('Z')
 
             # Write outupt to file
             with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
