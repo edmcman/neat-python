@@ -33,7 +33,7 @@ def sinc(x):
 
 
 # number of inputs in the network
-num_inputbits = 200
+num_inputbits = 32
 # num_tests is the number of random examples each network is tested against.
 num_tests = 16
 
@@ -64,7 +64,7 @@ class CustomReporter(neat.reporting.BaseReporter):
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
 
-    coverage = set()
+    coverage = {}
 
     try:
 
@@ -83,7 +83,8 @@ def eval_genome(genome, config):
                     subprocess.call("AFL_INST_LIBS=1 /usr/local/bin/afl-showmap -o %s -t 10000 -m 2000 -Q -q -- %s" % (covf.name, cl), shell=True)
 
                     with open(covf.name, "r") as covr:
-                        coverage |= set(covr.read().splitlines())
+                        for edge in covr.read().splitlines():
+                            coverage[edge] = coverage.get(edge, 0) + 1
                         #print(len(coverage))
                 except Exception as e:
                     print ("Ignoring exception from afl-showmap", e)
@@ -92,8 +93,9 @@ def eval_genome(genome, config):
         print ("Exception captured, returning zero", e)
         return 0
 
-    return float(len(coverage))
-
+    # We want to weight the first instance of an edge very heavily.  So the first weight is given one.
+    # The second is given 1/2, and third 1/3, and so on
+    return sum([sum([1/x for x in xrange(1,x+1)]) for x in coverage.values()])
 
 def eval_genomes(genomes, config):
     for genome_id, genome in genomes:

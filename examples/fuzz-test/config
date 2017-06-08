@@ -9,9 +9,9 @@ pop_size              = 500
 reset_on_extinction   = 0
 
 [DefaultGenome]
-num_inputs              = 200
-num_hidden              = 200
-num_outputs             = 200
+num_inputs              = 32
+num_hidden              = 32
+num_outputs             = 32
 initial_connection      = partial 0.01
 feed_forward            = False
 compatibility_disjoint_coefficient = 1.0
@@ -61,4 +61,3 @@ max_stagnation  = 20
 [DefaultReproduction]
 elitism            = 10
 survival_threshold = 0.2
-
