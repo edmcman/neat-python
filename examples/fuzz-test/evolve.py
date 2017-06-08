@@ -33,13 +33,13 @@ def sinc(x):
 
 
 # number of inputs in the network
-num_inputbits = 32
+num_inputbytes = 4
 # num_tests is the number of random examples each network is tested against.
 num_tests = 16
 
 def get_outputbytes(net, i):
     random.seed(i)
-    inputs = [random.random() for x in xrange(num_inputbits)]
+    inputs = [random.random() for x in xrange(num_inputbytes)]
     output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
     return output.bytes
 

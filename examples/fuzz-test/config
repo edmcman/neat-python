@@ -9,9 +9,9 @@ pop_size              = 500
 reset_on_extinction   = 0
 
 [DefaultGenome]
-num_inputs              = 32
-num_hidden              = 32
-num_outputs             = 32
+num_inputs              = 4
+num_hidden              = 300
+num_outputs             = 4
 initial_connection      = partial 0.01
 feed_forward            = False
 compatibility_disjoint_coefficient = 1.0
