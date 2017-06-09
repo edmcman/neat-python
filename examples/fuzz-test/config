@@ -28,7 +28,7 @@ activation_options      = sigmoid
 activation_mutate_rate  = 0.1
 aggregation_default     = sum
 aggregation_options     = sum product
-aggregation_mutate_rate = 0.0
+aggregation_mutate_rate = 0.1
 bias_init_mean          = 0.0
 bias_init_stdev         = 1.0
 bias_replace_rate       = 0.1
@@ -40,7 +40,7 @@ response_init_mean      = 1.0
 response_init_stdev     = 0.1
 response_replace_rate   = 0.1
 response_mutate_rate    = 0.1
-response_mutate_power   = 0.1
+response_mutate_power   = 1.0
 response_max_value      = 30.0
 response_min_value      = -30.0
 
@@ -50,7 +50,7 @@ weight_init_mean        = 0.0
 weight_init_stdev       = 1.0
 weight_mutate_rate      = 0.8
 weight_replace_rate     = 0.1
-weight_mutate_power     = 0.5
+weight_mutate_power     = 1.0
 enabled_default         = True
 enabled_mutate_rate     = 0.01
 
