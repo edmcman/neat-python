@@ -39,7 +39,7 @@ num_tests = 16
 
 def get_outputbytes(net, i):
     random.seed(i)
-    inputs = [x/256.0 for x in xrange(0,256)]+[random.random() for x in xrange(num_inputbytes)]
+    inputs = [-1.0, 0.0, 1.0]+[random.random() for x in xrange(num_inputbytes)]
     output = Bits().join(map(lambda x: BitArray(uint=max(0,min(255,int(x*256))), length=8), net.activate(inputs)))
     return output.bytes
 
@@ -62,6 +62,24 @@ class CustomReporter(neat.reporting.BaseReporter):
         #print(best_genome)
         print("STATUS %f,%f" % (time.time(), best_genome.fitness))
 
+def stupid_eval_genome(genome, config):
+    net = neat.nn.RecurrentNetwork.create(genome, config)
+
+    best = 0
+    
+    for i in range(num_tests):
+        output = get_outputbytes(net, i)
+        if output[0] == "F":
+            best += 1
+            if output[1] == "U":
+                best += num_tests
+                if output[2] == "Z":
+                    best += num_tests*num_tests
+                    if output[3] == "Z":
+                        best += num_tests*num_tests*num_tests
+
+    return best
+
 def eval_genome(genome, config):
     net = neat.nn.RecurrentNetwork.create(genome, config)
 
@@ -71,14 +89,6 @@ def eval_genome(genome, config):
 
         for i in range(num_tests):
             output = get_outputbytes(net, i)
-            if output[0] == 'F':
-                print('F')
-                if output[1] == 'U':
-                    print('U')
-                    if output[2] == 'Z':
-                        print('Z')
-                        if output[3] == 'Z':
-                            print('Z')
 
             # Write outupt to file
             with tempfile.NamedTemporaryFile(prefix="input") as f, tempfile.NamedTemporaryFile(prefix="cov") as covf:
@@ -135,7 +145,7 @@ def run(argv):
     pop.add_reporter(CustomReporter())
 
     if 1:
-        pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), eval_genome)
+        pe = neat.ParallelEvaluator(multiprocessing.cpu_count(), stupid_eval_genome)
         winner = pop.run(pe.evaluate, 1000)
     else:
         winner = pop.run(eval_genomes, 1000)
